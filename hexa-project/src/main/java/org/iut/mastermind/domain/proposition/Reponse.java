@@ -2,6 +2,8 @@ package org.iut.mastermind.domain.proposition;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.IntStream;
+
 import static java.util.Collections.unmodifiableList;
 
 public class Reponse {
@@ -20,21 +22,19 @@ public class Reponse {
 
     // on construit le résultat en analysant chaque lettre
     // du mot proposé
-    public void compare(String essai) {
-        essai.chars().forEach(c -> {
-            resultat.add(evaluationCaractere((char) c));
-            position++;
-        });
+    public List<Lettre> compare(String essai) {
+        resultat.clear();
+
+        IntStream.range(0, essai.length())
+                .mapToObj(i -> evaluationCaractere(essai.charAt(i), i))
+                .forEach(resultat::add);
+
+        return resultat;
     }
 
     // si toutes les lettres sont placées
     public boolean lettresToutesPlacees() {
-        position = 0;
-        return motSecret.chars().allMatch(c -> {
-            boolean isPlaced = estPlace((char) c);
-            position++;
-            return isPlaced;
-        }) && resultat.stream().noneMatch(lettre -> lettre == Lettre.INCORRECTE);
+        return resultat.stream().allMatch(lettre -> lettre == Lettre.PLACEE);
     }
 
     public List<Lettre> lettresResultat() {
@@ -42,9 +42,13 @@ public class Reponse {
     }
 
     // renvoie le statut du caractère
-    private Lettre evaluationCaractere(char carCourant) {
-                return estPresent(carCourant) ?
-                estPlace(carCourant) ? Lettre.PLACEE : Lettre.NON_PLACEE :
+    private Lettre evaluationCaractere(char carCourant, int position) {
+        if (position >= motSecret.length()) {
+            return Lettre.INCORRECTE;
+        }
+
+        return estPresent(carCourant) ?
+                (motSecret.charAt(position) == carCourant ? Lettre.PLACEE : Lettre.NON_PLACEE) :
                 Lettre.INCORRECTE;
     }
 

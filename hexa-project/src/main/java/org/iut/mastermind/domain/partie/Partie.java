@@ -45,18 +45,19 @@ public class Partie {
     // et on renvoie la réponse
     // si toutes les lettres sont correctement placées,
     // on a terminé la partie
-    public Reponse tourDeJeu(String motPropose) {
+    public Object[] tourDeJeu(String motPropose) {
         if (partieTerminee) {
             throw new IllegalStateException("La partie est déjà terminée");
         }
-        nbEssais++;
+
         MotSecret motSecret = new MotSecret(motADeviner);
         Reponse reponse = motSecret.compareProposition(motPropose);
-        if (reponse.lettresToutesPlacees()) {
-            partieTerminee = true;
-        }
-        verifieNbEssais();
-        return reponse;
+
+        boolean partieTerminee = reponse.lettresToutesPlacees() || (nbEssais + 1 >= NB_ESSAIS_MAX);
+
+        Partie nouvellePartie = new Partie(joueur, motADeviner, nbEssais + 1, partieTerminee);
+
+        return new Object[]{nouvellePartie, reponse};
     }
 
     // vérifie que le nombre d'essais max n'est pas atteint
