@@ -1,5 +1,4 @@
 package org.iut.mastermind.domain.partie;
-
 import org.iut.mastermind.domain.proposition.MotSecret;
 import org.iut.mastermind.domain.proposition.Reponse;
 
@@ -25,17 +24,14 @@ public class Partie {
         return new Partie(joueur, motADeviner, nbEssais, false);
     }
 
-    // getter joueur
     public Joueur getJoueur() {
         return joueur;
     }
 
-    // getter nombre d'essais
     public int getNbEssais() {
         return nbEssais;
     }
 
-    // getter mot à deviner
     public String getMot() {
         return motADeviner;
     }
@@ -46,33 +42,16 @@ public class Partie {
     // si toutes les lettres sont correctement placées,
     // on a terminé la partie
     public Object[] tourDeJeu(String motPropose) {
-        if (partieTerminee) {
-            throw new IllegalStateException("La partie est déjà terminée");
-        }
-
-        MotSecret motSecret = new MotSecret(motADeviner);
-        Reponse reponse = motSecret.compareProposition(motPropose);
-
-        boolean partieTerminee = reponse.lettresToutesPlacees() || (nbEssais + 1 >= NB_ESSAIS_MAX);
-
-        Partie nouvellePartie = new Partie(joueur, motADeviner, nbEssais + 1, partieTerminee);
-
-        return new Object[]{nouvellePartie, reponse};
+        if (partieTerminee) throw new IllegalStateException("La partie est déjà terminée");
+        Reponse reponse = new MotSecret(motADeviner).compareProposition(motPropose);
+        partieTerminee = reponse.lettresToutesPlacees() || ++nbEssais >= NB_ESSAIS_MAX;
+        return new Object[]{this, reponse};
     }
 
-    // vérifie que le nombre d'essais max n'est pas atteint
-    private void verifieNbEssais() {
-        if (nbEssais >= NB_ESSAIS_MAX) {
-            partieTerminee = true;
-        }
-    }
-
-    // la partie est-elle terminée
     public boolean isTerminee() {
         return partieTerminee;
     }
 
-    // la partie est terminée
     void done() {
         this.partieTerminee = true;
     }
